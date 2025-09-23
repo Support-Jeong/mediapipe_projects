@@ -1,4 +1,5 @@
 # https://puleugo.tistory.com/10
+# opencv version : 4.10.0.82
 
 import cv2
 import mediapipe as mp
@@ -12,8 +13,8 @@ print('model loaded. model path :', model_path)
 
 print('cv2 test start')
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1980)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 with mp_hands.Hands(
     model_complexity=0,
@@ -23,15 +24,15 @@ with mp_hands.Hands(
   while cap.isOpened():
     success, image = cap.read()
     if not success:
-      print("카메라를 찾을 수 없습니다.")
+      print("can't find cam...")
       continue
 
-    # 필요에 따라 성능 향상을 위해 이미지 작성을 불가능함으로 기본 설정합니다.
+    # 필요에 따라 성능 향상을 위해 이미지 작성을 불가능함으로 기본 설정
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = hands.process(image)
 
-    # 이미지에 손 주석을 그립니다.
+    # 이미지에 손 주석 그리기
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     if results.multi_hand_landmarks:
@@ -42,7 +43,7 @@ with mp_hands.Hands(
             mp_hands.HAND_CONNECTIONS,
             mp_drawing_styles.get_default_hand_landmarks_style(),
             mp_drawing_styles.get_default_hand_connections_style())
-    #보기 편하게 이미지를 좌우 반전합니다.
+    #보기 편하게 이미지 좌우 반전
     cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
     if cv2.waitKey(1) & 0xFF == ord('q'):
       break

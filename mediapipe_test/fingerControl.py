@@ -4,6 +4,12 @@ import mediapipe as mp
 import serial
 import math
 
+isFinger1fold = True
+isFinger2fold = True
+isFinger3fold = True
+isFinger4fold = True
+isFinger5fold = True
+
 finger0_x = finger4_x = finger8_x = finger9_x = finger12_x = finger16_x = finger20_x = 0
 finger0_y = finger4_y = finger8_y = finger9_y = finger12_y = finger16_y = finger20_y = 0
 
@@ -62,37 +68,83 @@ while True:
                     image, text='dist1=%d dist2=%d dist3=%d dist4=%d dist5=%d' % (dist_1,dist_2,dist_3,dist_4,dist_5), org=(10, 30),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.6,
                     color=(255,0,0), thickness=2)
-
-                if dist_1<= 100:
+                
+                # 변경사항 발생할때만 회전하도록 수정
+                if dist_1<=100 and isFinger1fold==False:
                     arduino.write(b'1')
                     print('arduino write 1')
-                else:
+                    isFinger1fold = True
+                elif dist_1 > 100 and isFinger1fold==True:
                     arduino.write(b'2')
                     print('arduino write 2')
-                if dist_2<=150:
+                    isFinger1fold = False
+
+                if dist_2<=150 and isFinger2fold==False:
                     arduino.write(b'3')
                     print('arduino write 3')
-                else:
+                    isFinger2fold = True
+                elif dist_2 > 150 and isFinger2fold==True:
                     arduino.write(b'4')
                     print('arduino write 4')
-                if dist_3<=150:
+                    isFinger2fold = False       
+
+                if dist_3<=150 and isFinger3fold==False:
                     arduino.write(b'5')
                     print('arduino write 5')
-                else:
+                    isFinger3fold = True
+                elif dist_3 > 150 and isFinger3fold==True:
                     arduino.write(b'6')
                     print('arduino write 6')
-                if dist_4<=150:
+                    isFinger3fold = False
+
+                if dist_4<=150 and isFinger4fold==False:
                     arduino.write(b'7')
                     print('arduino write 7')
-                else:
+                    isFinger4fold = True
+                elif dist_4 > 150 and isFinger4fold==True:
                     arduino.write(b'8')
                     print('arduino write 8')
-                if dist_5<=150:
+                    isFinger4fold = False
+
+                if dist_5<=150 and isFinger5fold==False:
                     arduino.write(b'9')
                     print('arduino write 9')
-                else:
+                    isFinger5fold = True
+                elif dist_5 > 100 and isFinger5fold==True:
                     arduino.write(b'0')
                     print('arduino write 0')
+                    isFinger5fold = False
+
+                # if dist_1<= 100:
+                #     arduino.write(b'1')
+                #     print('arduino write 1')
+                # else:
+                #     arduino.write(b'2')
+                #     print('arduino write 2')
+                # if dist_2<=150:
+                #     arduino.write(b'3')
+                #     print('arduino write 3')
+                # else:
+                #     arduino.write(b'4')
+                #     print('arduino write 4')
+                # if dist_3<=150:
+                #     arduino.write(b'5')
+                #     print('arduino write 5')
+                # else:
+                #     arduino.write(b'6')
+                #     print('arduino write 6')
+                # if dist_4<=150:
+                #     arduino.write(b'7')
+                #     print('arduino write 7')
+                # else:
+                #     arduino.write(b'8')
+                #     print('arduino write 8')
+                # if dist_5<=150:
+                #     arduino.write(b'9')
+                #     print('arduino write 9')
+                # else:
+                #     arduino.write(b'0')
+                #     print('arduino write 0')
 
                 
                     

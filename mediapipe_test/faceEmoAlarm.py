@@ -1,12 +1,15 @@
-import cv2, mediapipe as mp, math, time
+import cv2
+import mediapipe as mp
+import math
+import time
 import serial
 
 # ====== 사용자 환경 설정 ======
-SERIAL_PORT = "COM5"
-BAUD = 9600
-EAR_TH = 0.28          # 눈뜸 임계값(↑=더 크게 떠야 '깸'); 학생별로 보정
-AWAKE_FRAMES = 20      # 연속 open 프레임(≈ 0.7~1초) 이상이면 '깸'
-SLEEPY_FRAMES = 10     # 연속 closed 프레임이면 '덜깸'으로 전환
+SERIAL_PORT = "COM6"   # 포트 설정 : 아두이노가 연결된 포트번호 입력
+BAUD = 9600            # 보드레이트 : 기본 9600
+EAR_TH = 0.28          # 눈뜸(Eye Aspect Ratio) 임계값 : 눈의 세로 길이(더 크게 떠야 '깸'), 사용자에 맞춰 값 수정
+AWAKE_FRAMES = 20      # 연속 open 프레임 : 20프레임 이상 눈뜸 상태 지속되면 '깸'
+SLEEPY_FRAMES = 10     # 연속 closed 프레임 :10 프레임 이상 눈감음 상태 지속되면 '덜깸'으로 전환
 SHOW_LANDMARKS = True
 
 # ====== 시리얼 연결 (없어도 영상 디버깅 가능) ======
@@ -34,25 +37,26 @@ def eye_aspect_ratio(landmarks, w, h, eye):
     def P(i): return (landmarks[i].x*w, landmarks[i].y*h)
     # 수평
     pL, pR = P(eye["left"]), P(eye["right"])
-    # 수직 두 쌍 평균
+    # 수직(양 눈 평균)
     pT1, pT2 = P(eye["top1"]), P(eye["top2"])
     pB1, pB2 = P(eye["bot1"]), P(eye["bot2"])
     horiz = L2(pL, pR) + 1e-6
     vert  = (L2(pT1, pB1) + L2(pT2, pB2)) / 2.0
     return vert / horiz
 
+
 mp_face = mp.solutions.face_mesh
 
 # ====== 카메라 ======
-cap = cv2.VideoCapture(0)  # Win11 내장카메라면 백엔드 미지정 권장
+cap = cv2.VideoCapture(0)  # Win11 노트북 내장카메라 기준
 cap.set(cv2.CAP_PROP_FRAME_WIDTH,  640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-last_sent = ""
-last_time = 0
+last_sent = ""      # 직전 송신 상태 저장
+last_time = 0  
 awake_cnt = 0
 sleepy_cnt = 0
-state = 'S'   # 'A' (awake) / 'S' (sleepy) / 'F' (no face)
+state = 'S'         # 3개 상태 : 'A' (awake) / 'S' (sleepy) / 'F' (no face)
 
 with mp_face.FaceMesh(
     max_num_faces=1,
@@ -147,23 +151,6 @@ with mp_face.FaceMesh(
 
             except Exception as e:
                 print(f"[ERR] Serial write failed: {e}")
-                # if ser.is_open == False:
-                #     try:
-                #         ser = serial.Serial(SERIAL_PORT, BAUD, timeout=0.1)
-                #         time.sleep(2)
-                #         print(f"[SER] connected to {SERIAL_PORT}")
-                #     except Exception as e:
-                #         print("[SER] not connected:", e)
-
-
-# if ser and res and (emotion != last_sent) and (now - last_time > SEND_COOLDOWN):
-#             try:
-#                 ser.write(emotion.encode("utf-8"))
-#                 # ser.write(emotion)
-#                 last_sent = emotion
-#                 last_time = now
-#             except Exception as e:
-#                 print(f"[ERR] Serial write failed: {e}")
         
 
         cv2.imshow("Smart Morning Call (Eye-Open + Button)", frame)
